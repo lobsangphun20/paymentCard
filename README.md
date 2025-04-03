@@ -5,8 +5,8 @@ Our API contract is called IDD document which captured following details.
    - Method
    - Body if any
 2. Body
-   - content in the form of JSON
-   - Feild mapping to corresponspoding Domain objects if exist or else update it next version
+   - content in the form of JSON ( I prefer JSON of easier readability. Other options exist such as yml or xml etc.)
+   - Feild mapping to corresponspoding Domain objects if exist or else update it in next version
 3. Response
    - Response code
    - Response body which is JSON
