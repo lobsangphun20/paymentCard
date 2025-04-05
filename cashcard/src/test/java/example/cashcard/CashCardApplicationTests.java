@@ -2,6 +2,8 @@ package example.cashcard;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.URI;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,4 +47,31 @@ class CashCardApplicationTests {
 	  assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 	  assertThat(response.getBody()).isBlank();
 	}
+	
+	@Test
+	void shouldPostAndPersistIt() {
+		
+		CashCard cashCard = new CashCard(null, 250.00);
+		ResponseEntity<String> savedCashCard = restTemplate.postForEntity("/cashcards", cashCard, String.class);
+		assertThat(savedCashCard.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		
+		URI locationOfSavedCashCard = savedCashCard.getHeaders().getLocation();
+		
+		ResponseEntity<String> getResponse = restTemplate.getForEntity(locationOfSavedCashCard, String.class);
+		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		DocumentContext doc = JsonPath.parse(getResponse.getBody());
+		Number id = doc.read("$.id");
+		Double amount = doc.read("$.amount");
+		assertThat(id).isNotNull();
+		assertThat(cashCard.amount()).isEqualTo(amount);
+		
+	}
 }
+
+
+
+
+
+
+
