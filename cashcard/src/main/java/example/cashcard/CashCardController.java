@@ -1,6 +1,7 @@
 package example.cashcard;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,9 +32,9 @@ public class CashCardController {
 	   }
 	
 	@GetMapping("/{id}")
-	private ResponseEntity<CashCard> findById(@PathVariable(name = "id") Long id) {
+	private ResponseEntity<CashCard> findById(@PathVariable(name = "id") Long id, Principal principal) {
 		
-		Optional<CashCard> cashCard = cashCardCrudRepository.findById(id);
+		Optional<CashCard> cashCard = Optional.ofNullable(cashCardCrudRepository.findByIdAndOwner(id, principal.getName()));
 		
 		if(cashCard.isPresent()) {
 		return ResponseEntity.ok(cashCard.get());
@@ -43,18 +44,19 @@ public class CashCardController {
 	}
 	
 	@PostMapping
-	private ResponseEntity<Void> saveIt(@RequestBody CashCard cashCard, UriComponentsBuilder ucb){
+	private ResponseEntity<Void> saveIt(@RequestBody CashCard cashCard, UriComponentsBuilder ucb, Principal principal){
+		CashCard cashCardWithOwner = new CashCard(null, cashCard.amount(), principal.getName());
 		
-		CashCard savedCashCard = cashCardCrudRepository.save(cashCard);
+		CashCard savedCashCard = cashCardCrudRepository.save(cashCardWithOwner);
 		URI locationOfNewCashCard = ucb.path("cashcards/{id}").buildAndExpand(savedCashCard.id()).toUri();
 		
 		return ResponseEntity.created(locationOfNewCashCard).build();
 	}
 	
 	@GetMapping
-	private ResponseEntity<List<CashCard>> findAll(Pageable pageable){
+	private ResponseEntity<List<CashCard>> findAll(Pageable pageable, Principal principal){
 		
-		Page<CashCard> page = cashCardCrudRepository.findAll(
+		Page<CashCard> page = cashCardCrudRepository.findByOwner(principal.getName(),
 				PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSortOr(Sort.by(Direction.ASC, "amount")))
 				);
 		
