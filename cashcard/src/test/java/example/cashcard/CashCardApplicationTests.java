@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -142,5 +144,40 @@ class CashCardApplicationTests {
 		ResponseEntity<String> response = restTemplate.withBasicAuth("sarah1", "abc123").getForEntity("/cashcards/102",
 				String.class); // kumar2's data
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+	
+	@Test
+    @DirtiesContext
+    void shouldUpdateAnExistingCashCard() {
+        CashCard updatedCashCard = new CashCard(null, 19.99, null);
+        HttpEntity<CashCard> request = new HttpEntity<>(updatedCashCard);
+        ResponseEntity<Void> response = restTemplate
+        .withBasicAuth("sarah1", "abc123")
+        .exchange("/cashcards/99", HttpMethod.PUT, request, Void.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    }
+	
+	@Test
+    void shouldNotUpdateACashCardThatDoesNotExist(){
+        CashCard unknownCard = new CashCard(null, 19.99, null);
+        HttpEntity<CashCard> request = new HttpEntity<>(unknownCard);
+        ResponseEntity<Void> response = restTemplate
+                .withBasicAuth("sarah1", "abc123")
+                .exchange("/cashcards/9999", HttpMethod.PUT, request, Void.class);
+
+                assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);        
+    }
+	
+	
+
+	@Test
+	void shouldNotUpdateACashCardThatIsOwnedBySomeoneElse() {
+	    CashCard kumarsCard = new CashCard(null, 333.33, null);
+	    HttpEntity<CashCard> request = new HttpEntity<>(kumarsCard);
+	    ResponseEntity<Void> response = restTemplate
+	            .withBasicAuth("sarah1", "abc123")
+	            .exchange("/cashcards/102", HttpMethod.PUT, request, Void.class);
+	    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 	}
 }

@@ -3,7 +3,7 @@ package example.cashcard;
 import java.net.URI;
 import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
+//import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,10 +35,10 @@ public class CashCardController {
 	@GetMapping("/{id}")
 	private ResponseEntity<CashCard> findById(@PathVariable(name = "id") Long id, Principal principal) {
 		
-		Optional<CashCard> cashCard = Optional.ofNullable(cashCardCrudRepository.findByIdAndOwner(id, principal.getName()));
+		CashCard cashCard = findCashCard(id, principal);
 		
-		if(cashCard.isPresent()) {
-		return ResponseEntity.ok(cashCard.get());
+		if(cashCard != null) {
+		return ResponseEntity.ok(cashCard);
 		} else {
 			return ResponseEntity.notFound().build();
 		}
@@ -64,5 +65,21 @@ public class CashCardController {
 		
 	}
 	
+	
+	@PutMapping("/{id}")
+    private ResponseEntity<Void> putCashCard(@PathVariable(name = "id") Long requestedId, @RequestBody CashCard cashCardUpdate, Principal principal) {
+        CashCard cashCard = findCashCard(requestedId, principal);
+        if(cashCard != null) {
+        CashCard updatedCashCard = new CashCard(cashCard.id(), cashCardUpdate.amount(), principal.getName());
+        cashCardCrudRepository.save(updatedCashCard);
+        return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+	
+	//utility method
+	private CashCard findCashCard(Long requestedId, Principal principal) {
+	    return cashCardCrudRepository.findByIdAndOwner(requestedId, principal.getName());
+	}
 }
 
