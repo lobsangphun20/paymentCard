@@ -1,4 +1,4 @@
-package example.cashcard;
+package example.cashcard.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

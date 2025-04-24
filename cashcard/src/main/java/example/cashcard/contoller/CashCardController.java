@@ -1,4 +1,4 @@
-package example.cashcard;
+package example.cashcard.contoller;
 
 import java.net.URI;
 import java.security.Principal;
@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import example.cashcard.domainDefinition.CashCard;
+import example.cashcard.repository.CashCardCrudRepository;
 
 @RestController
 @RequestMapping("/cashcards")
